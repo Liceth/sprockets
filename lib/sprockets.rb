@@ -155,6 +155,12 @@ module Sprockets
   register_transformer 'application/ecmascript-6', 'application/javascript', BabelProcessor
   register_preprocessor 'application/ecmascript-6', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
+  # CommonJS processor
+  require 'sprockets/commonjs_processor'
+  register_postprocessor 'application/javascript', CommonjsProcessor
+  append_path File.expand_path('../assets', __FILE__)
+
+
   # Mmm, CoffeeScript
   require 'sprockets/coffee_script_processor'
   register_mime_type 'text/coffeescript', extensions: ['.coffee', '.js.coffee']
