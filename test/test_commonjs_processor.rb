@@ -19,9 +19,9 @@ class TestCommonjsProcessor < MiniTest::Test
     }
 
     assert output = Sprockets::CommonjsProcessor.call(input)
-    assert_match(/this.require.define\({"mod.module":function/, output[:data])
+    assert_match(/require.register\("mod.module",function/, output[:data])
   	assert_match(/module.exports = function\(\){/, output[:data])
-  	assert_match(/commonjs.js/, output[:required].first.to_s)
+  	assert_match(/commonjs-require.js/, output[:required].first.to_s)
   end
 
   def test_wrap_commonjs_module_in_file_with_module_export
@@ -39,9 +39,9 @@ class TestCommonjsProcessor < MiniTest::Test
     }
 
     assert output = Sprockets::CommonjsProcessor.call(input)
-    assert_match(/this.require.define\({"mod":function/, output[:data])
+    assert_match(/require.register\("mod",function/, output[:data])
     assert_match(/module.exports = function\(\){/, output[:data])
-    assert_match(/commonjs.js/, output[:required].first.to_s)
+    assert_match(/commonjs-require.js/, output[:required].first.to_s)
   end
 
   def test_cache_key

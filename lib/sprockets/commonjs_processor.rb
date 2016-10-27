@@ -3,17 +3,17 @@ module Sprockets
   class CommonjsProcessor
     VERSION = '1'
 
-    WRAPPER = 'this.require.define({"%s":' +
+    WRAPPER = 'require.register("%s",' +
     'function(exports, require, module){' +
     '%s' +
-    ";}});\n"
+    "})\n"
 
     EXTENSIONS = %w{.module .cjs}
 
     def self.instance
       @instance ||= new
     end
-    
+
     def self.call(input)
       instance.call(input)
     end
@@ -25,8 +25,8 @@ module Sprockets
     def call(input)
       if commonjs_module?(input)
         required  = Set.new(input[:metadata][:required])
-        required << input[:environment].resolve("commonjs.js")[0]
-        { data: WRAPPER % [ input[:name], input[:data] ], required: required }
+        required << input[:environment].resolve("commonjs-require.js")[0]
+        { data: WRAPPER % [ File.basename(input[:name]), input[:data] ], required: required }
       else
         input[:data]
       end
@@ -36,7 +36,7 @@ module Sprockets
 
     def commonjs_module?(input)
       EXTENSIONS.include?(File.extname(input[:name])) ||
-      input[:data] =~ /module.exports\s?=/
+      (input[:data] =~ /module.exports\s?=/ && input[:name] != 'commonjs-require')
     end
   end
 end
