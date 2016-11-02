@@ -2,6 +2,7 @@
 require 'sprockets_test'
 require 'rack/mock'
 require 'execjs'
+require 'byebug'
 
 module EnvironmentTests
   def self.test(name, &block)
@@ -232,6 +233,9 @@ module EnvironmentTests
       @env["npm-nested/a/b"].filename
   end
 
+  test "that should fail" do
+  byebug
+  end
   test "find npm main by format extension" do
     assert_equal fixture_path('default/npm/main.js'),
       @env["npm.js"].filename
