@@ -1,0 +1,1 @@
+module.exports = "Other string exported via CommonJS";
