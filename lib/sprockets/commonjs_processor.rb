@@ -28,9 +28,11 @@ module Sprockets
     end
 
     def call(input)
+      byebug
       if commonjs_module?(input)
         required  = Set.new(input[:metadata][:required])
         required << input[:environment].resolve("commonjs-require.js")[0]
+
         nested_requires = resolve_requires(input)
         required = required + nested_requires
 
