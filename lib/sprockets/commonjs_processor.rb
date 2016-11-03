@@ -11,7 +11,7 @@ module Sprockets
     '%s' +
     "})\n"
 
-    ALIAS_WRAPPER = 'require.registerAlias("%s","%s")\\n'
+    ALIAS_WRAPPER = %{require.registerAlias("%s","%s")\n}
 
     EXTENSIONS = %w{.module .cjs}
 
@@ -28,19 +28,35 @@ module Sprockets
     end
 
     def call(input)
-      byebug
       if commonjs_module?(input)
         required  = Set.new(input[:metadata][:required])
         required << input[:environment].resolve("commonjs-require.js")[0]
-        extra_data = register_alias(input)
-        data = MODULE_WRAPPER % [ input[:name], input[:data] ]
-        { data: data + extra_data, required: required }
+        nested_requires = resolve_requires(input)
+        required = required + nested_requires
+
+        alias_data = register_alias(input)
+        data = (MODULE_WRAPPER % [ input[:name], input[:data] ]) + alias_data
+        
+        { data: data, required: required }
       else
         input[:data]
       end
     end
 
     private
+
+    def resolve_requires(input)
+      requires = []
+      input[:data].scan(/require\(["'](.+)["']\)/).flatten.each do |require_path|
+        if PathUtils.relative_path?(require_path)
+          path = PathUtils.join(File.dirname(input[:name]), require_path)
+          requires << input[:environment].resolve(path)[0]
+        else
+          requires << input[:environment].resolve(require_path)
+        end
+      end
+      Set.new(requires)
+    end
 
     def register_alias(input)
       package_name = File.dirname(input[:name])
@@ -63,13 +79,10 @@ module Sprockets
     end
 
     def commonjs_module?(input)
+      return false if input[:name] == 'commonjs-require'
       EXTENSIONS.include?(File.extname(input[:name])) ||
-      (input[:data] =~ /module.exports\s?=/ && input[:name] != 'commonjs-require')
-    end
-
-    def resolve_asset(asset)
-      logical_path = asset.logical_path
-      logical_path.sub(File.extname(logical_path), "")
+      input[:data] =~ /\w+.exports\s?=/ ||
+      input[:data] =~ /Object.defineProperty\(exports,\s*"__esModule"/
     end
   end
 end
