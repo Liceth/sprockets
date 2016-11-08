@@ -84,7 +84,8 @@ module Sprockets
       return false if input[:name] == 'commonjs-require'
       EXTENSIONS.include?(File.extname(input[:name])) ||
       input[:data] =~ /\w+.exports\s?=/ ||
-      input[:data] =~ /Object.defineProperty\(exports,\s*"__esModule"/
+      input[:data] =~ /Object.defineProperty\(exports,\s*"__esModule"/ ||
+      input[:data] =~ /exports.\w+\s+=/
     end
   end
 end
