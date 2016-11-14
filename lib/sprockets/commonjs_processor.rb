@@ -53,7 +53,7 @@ module Sprockets
           path = PathUtils.join(File.dirname(input[:name]), require_path)
           requires << input[:environment].resolve(path)[0]
         else
-          requires << input[:environment].resolve(require_path)
+          requires << input[:environment].resolve(require_path)[0]
         end
       end
       Set.new(requires)
